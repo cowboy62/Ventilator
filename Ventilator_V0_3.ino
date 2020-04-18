@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------
 * Ventilator motion control
-* Date:2020/04/18
+* Date:2020/04/18 
 * Version:v0.3
 * File: Ventilator
 * Note: Ventilator motion control
@@ -140,34 +140,37 @@ int moto_action(int SETST ,int BPM,int VOL,int SPD){
   stepper.setMaxSpeed(SPD*10);
   switch(st){
     case 0:   //init
-      if (digitalRead(runPin) == 0  ) st = 1;       //    RUN SWITCH ON 
+      if (digitalRead(runPin) == 0  ) st++;       //    RUN SWITCH ON 
       // st = 1;
       break;
-    case 1:    // home
-      stepper.moveTo((0-dMaxStep) - dHomeStep );
+    case 1:    //go home
+      stepper.moveTo((0-dMaxStep) - dHomeStep );      
+      st++;
+      break;
+    case 2:    //waiting home
       if ((stepper.distanceToGo()==0)||((dEnHomeSensor==1)&&(digitalRead(homePin)==0))){
         stepper.setCurrentPosition(0);
-        st = 2;
-      }
-      
+        stepper.moveTo(0);
+        st++;
+      }      
       break;
-    case 2:    // idle
-      st = 3;             
+    case 3:    // idle
+      st ++;             
       break;
-    case 3:   // start breathing loop 
+    case 4:   // start breathing loop 
         StartMillis = millis();                     //    這次開始的時間
         LoopMillis  = 60000 /  BPM ;                //    每個週期有几個ms
         EndMillis   = StartMillis + LoopMillis ;    //    這次週期結束的時間
         MidMillis   = StartMillis + ((LoopMillis * dRateOfInhaleExhale )/100  ) ;  //    這次吸氣結束時間
-        st=4;
-    case 4:    //floward  吸氣
+        st++;
+    case 5:    //floward  吸氣
       stepper.moveTo(MotoStep);
-      if (stepper.distanceToGo() == 0) { st = 5; }
+      if (stepper.distanceToGo() == 0) { st++; }
       break;
-    case 5:    //waiting for MidMillis
-      if (millis() > MidMillis) { st = 6;}
+    case 6:    //waiting for MidMillis
+      if (millis() > MidMillis) { st++;}
       break;
-    case 6:    //back  呼氣
+    case 7:    //back  呼氣
       if (dEnHomeSensor==1) {
         stepper.moveTo(0-dHomeStep);
       }else {
@@ -177,14 +180,14 @@ int moto_action(int SETST ,int BPM,int VOL,int SPD){
       { 
         stepper.setCurrentPosition(0);
         stepper.moveTo(0);
-        st = 7;
+        st++;
        }
       break;
-    case 7:    //waiting for EndMillis
-      if (millis() > EndMillis) { st = 3;}
+    case 8:    //waiting for EndMillis
+      if (millis() > EndMillis) { st = 4;}
       break;     
     default:
-      st = 3 ;
+      st = 4 ;
   }  
   
   stepper.run();
