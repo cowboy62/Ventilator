@@ -35,3 +35,6 @@ Ventilator motion control
     加上開始的按鍵
     加上home sensor ,每個LOOP結束後都做HOME的校正
     由通迅取代可變電阻
+
+LINKS:
+https://github.com/zzzrrr/EV-03-1
